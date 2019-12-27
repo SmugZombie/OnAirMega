@@ -1,6 +1,6 @@
 # OnAir Mega Script - Combines all tools into One
 # Ron Egli - Github.com/SmugZombie
-# Version 1.1.2
+# Version 1.1.3
 # Made for use with alreadydev.com
 
 # Load INI Items
@@ -11,7 +11,6 @@ $DebugMode =                    Get-Content -Path $INI | Where-Object { $_ -matc
 $StatusUrl =                    Get-Content -Path $INI | Where-Object { $_ -match 'Status=' }; $StatusUrl = $StatusUrl.Split('=')[1]
 $OnAirUrl =                     Get-Content -Path $INI | Where-Object { $_ -match 'OnAir=' }; $OnAirUrl = $OnAirUrl.Split('=')[1]
 $OnAirReloadUrl =               Get-Content -Path $INI | Where-Object { $_ -match 'OnAirReload=' }; $OnAirReloadUrl = $OnAirReloadUrl.Split('=')[1]
-$CheckOnAirUrl =                Get-Content -Path $INI | Where-Object { $_ -match 'CheckOnAir=' }; $CheckOnAirUrl = $CheckOnAirUrl.Split('=')[1]
 $PlayTrackerUrl =               Get-Content -Path $INI | Where-Object { $_ -match 'PlayTracker=' }; $PlayTrackerUrl = $PlayTrackerUrl.Split('=')[1]
 $FullScreenUrl =                Get-Content -Path $INI | Where-Object { $_ -match 'FullScreen=' }; $FullScreenUrl = $FullScreenUrl.Split('=')[1]
 $AutoPurgeUrl =                 Get-Content -Path $INI | Where-Object { $_ -match 'AutoPurge=' }; $AutoPurgeUrl = $AutoPurgeUrl.Split('=')[1]
@@ -234,7 +233,7 @@ function remoteRename {
 }
 
 function CheckOnAir {
-    $response_OA = (Invoke-WebRequest -Uri $CheckOnAirUrl -UseBasicParsing).Content
+    $response_OA = (Invoke-WebRequest -Uri $OnAirUrl -UseBasicParsing).Content
     debug("OnAirResponse: $response_OA")
     #echo $response
     If ($response_OA -eq $global:current_total) {
@@ -368,4 +367,5 @@ Changelog:
 1.1.0 Todo - Add ability to remote toggle sfw_mode, rewrite how audio/gifs are loaded so can be loaded dynmically without reloading the script
 1.1.1 - Added Remote FullScreen Tool
 1.1.2 - Moved all (remaining) variables to config
+1.1.3 - Adjusted some workings with OnAir (core) functionality
 #>
