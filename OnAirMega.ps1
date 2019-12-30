@@ -183,13 +183,14 @@ function remoteTalk {
     if($global:safe_mode -eq 0) { # If safemode not enabled
         $response_RT = (Invoke-WebRequest -Uri $RemoteTalkUrl -UseBasicParsing).Content
         debug("RemoteTalkResponse: $response_RT")
+        $seed = Get-Random -Minimum 1000 -Maximum 9999
         if($response_RT -ne ""){
             Write-Host "Saying: $response_RT"
             # Script here to play the file
             #echo $response_RT | ./voice.exe -f
-            Set-Content -Path C:/Temp/voice.temp -Value $response_RT
+            Set-Content -Path C:/Temp/voice.$seed.temp -Value $response_RT
             $msbuild = "C:/Temp/voice.exe"
-            $arguments = "-f -k C:/Temp/voice.temp"
+            $arguments = "-f -k C:/Temp/voice.$seed.temp"
             Start-Process -NoNewWindow $msbuild $arguments
         }
     }
@@ -368,4 +369,6 @@ Changelog:
 1.1.1 - Added Remote FullScreen Tool
 1.1.2 - Moved all (remaining) variables to config
 1.1.3 - Adjusted some workings with OnAir (core) functionality
+1.1.4 - Added Seed to Computron voice file to prevent repeating self on multiple overlapping requests
+1.1.4 - ToDo - Create Stats script to keep track of current totals, runtime, last start
 #>
