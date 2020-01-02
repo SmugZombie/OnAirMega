@@ -1,6 +1,6 @@
 # OnAir Mega Script - Combines all tools into One
 # Ron Egli - Github.com/SmugZombie
-# Version 1.1.3
+# Version 1.1.5
 # Made for use with alreadydev.com
 
 # Load INI Items
@@ -80,6 +80,8 @@ function remoteFullScreen {
         if($global:safe_mode -eq 0) {
             if($response_FS -eq "stop"){
                 remoteFullScreenStop
+            }elseif($response_FS -eq "pause"){
+                remoteFullScreenpause
             }else{
                 Write-Host "Now Remote Playing: $response_FS"
                 ./FullScreenYouTube.exe "play" "- YouTube" "chrome.exe --app=$response_FS"
@@ -95,6 +97,11 @@ function remoteFullScreenStop {
     Write-Host "Stopping FullScreen Process"
 }
 
+function remoteFullScreenPause {
+    ./FullScreenYouTube.exe pause
+    Write-Host "Pausing/Playing FullScreen Process"
+}
+
 function remotePlay {
     # Grab the latest invocation of remote play available on the webserver at the time
     $response_RP = (Invoke-WebRequest -Uri $RemotePlayUrl -UseBasicParsing).Content
@@ -103,7 +110,7 @@ function remotePlay {
         # Script here to play the file
         if($global:safe_mode -eq 0) {
             if($response_RP -eq "stop"){
-                remoteStop
+                remoteStop 1
             }else{
                 Write-Host "Now Remote Playing: $response_RP"
                 $sound = $response_RP.split(":")[0]
@@ -115,7 +122,7 @@ function remotePlay {
     }
 }
 
-function remoteStop {
+function remoteStop($force=1) {
     $ProcessActive = Get-Process OnAirPlayer -ErrorAction SilentlyContinue
     if($ProcessActive -eq $null)
     {
@@ -137,8 +144,12 @@ function remoteStop {
         Stop-Process -name "voice"
         ./GifDisplay.exe filename=shh.gif
     } 
-
-    remoteFullScreenStop
+    if($force -eq 0){
+        remoteFullScreenPause
+    }else{
+        remoteFullScreenStop
+    }
+    
 }
 
 function remoteMedia {
@@ -259,7 +270,7 @@ function CheckOnAir {
     }elseIf($global:current_total -eq 0 -AND $response_OA -gt $global:current_total){
         $global:current_total = $response_OA
         $global:safe_mode = 1
-        remoteStop
+        remoteStop 0
         ./OnAirPlayer.exe filename=alert.wav
     }else {
         $global:current_total = $response_OA
@@ -371,4 +382,5 @@ Changelog:
 1.1.3 - Adjusted some workings with OnAir (core) functionality
 1.1.4 - Added Seed to Computron voice file to prevent repeating self on multiple overlapping requests
 1.1.4 - ToDo - Create Stats script to keep track of current totals, runtime, last start
+1.1.5 - Added Pause support to fullscreenyoutube.exe, Added soft stop (pause/play on new call) vs hard stop (stopallsounds)
 #>
