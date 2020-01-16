@@ -1,6 +1,6 @@
 # OnAir Mega Script - Combines all tools into One
 # Ron Egli - Github.com/SmugZombie
-# Version 1.1.5
+# Version 1.1.7
 # Made for use with alreadydev.com
 
 # Load INI Items
@@ -26,6 +26,7 @@ $RemoteTalkUrl =                Get-Content -Path $INI | Where-Object { $_ -matc
 $MediaDir =                     Get-Content -Path $INI | Where-Object { $_ -match 'MediaDir=' }; $MediaDir = $MediaDir.Split('=')[1]
 $GifsDir =                      Get-Content -Path $INI | Where-Object { $_ -match 'GifsDir=' }; $GifsDir = $GifsDir.Split('=')[1]
 $OnlineCheckUrl =               Get-Content -Path $INI | Where-Object { $_ -match 'OnlineCheckUrl=' }; $OnlineCheckUrl = $OnlineCheckUrl.Split('=')[1]
+$CustomScriptUrl =              Get-Content -Path $INI | Where-Object { $_ -match 'CustomScriptUrl=' }; $CustomScriptUrl = $CustomScriptUrl.Split('=')[1]
 # Change Window Title
 $host.ui.RawUI.WindowTitle = "$ScriptName $ScriptVersion - [AlreadyDev]"
 # Track Reloads
@@ -76,15 +77,17 @@ function remoteFullScreen {
     $response_FS = (Invoke-WebRequest -Uri $FullScreenUrl -UseBasicParsing).Content
     debug("RemoteFullScreenResponse: $response_FS")
     if($response_FS -ne ""){ #If response is not empty, play it
+        $video = $response_FS.split("#")[0]
+        $processor = $response_FS.split("#")[1]
         # Script here to play the file
         if($global:safe_mode -eq 0) {
-            if($response_FS -eq "stop"){
+            if($video -eq "stop"){
                 remoteFullScreenStop
-            }elseif($response_FS -eq "pause"){
+            }elseif($video -eq "pause"){
                 remoteFullScreenpause
             }else{
-                Write-Host "Now Remote Playing: $response_FS"
-                ./FullScreenYouTube.exe "play" "- YouTube" "chrome.exe --app=$response_FS"
+                Write-Host "Now Remote Playing: $video"
+                ./FullScreenYouTube.exe "$processor" "- YouTube" "chrome.exe --app=$video"
             }            
         }else{
             Write-Host "Skipping Remote FullScreen ($response_FS) - Safe Mode Enabled"
@@ -333,6 +336,23 @@ function CheckStatus {
     $response_ST = (Invoke-WebRequest -Uri $StatusUrl -UseBasicParsing).Content
 }
 
+function CustomScript {
+    $response_CS = (Invoke-WebRequest -Uri $CustomScriptUrl -UseBasicParsing).Content
+    if($response_CS -ne ""){
+        Write-Host "DEBUG: $response_CS"
+        switch ($response_CS) {
+            "jackbox"  {
+                Write-Host "Launching Jackbox Games"
+                $msbuild = "C:\Program Files\JackboxPartyPack1\The Jackbox Party Pack.exe"
+                $arguments = ""
+                Start-Process -filepath $msbuild -WorkingDirectory "C:\Program Files\JackboxPartyPack1" #$arguments
+                break
+            }
+            default {break}
+        }
+    }
+}
+
 
 ###############################
 # MAIN
@@ -355,7 +375,6 @@ while($true)
 {
     CheckNet
     CheckOnAir
-    #CheckStatus
     remotePlay
     remoteMedia
     remoteGif
@@ -363,6 +382,7 @@ while($true)
     remoteFullScreen
     autoPurge
     remoteRename
+    CustomScript
     Start-Sleep -s 1
 }
 
@@ -383,4 +403,6 @@ Changelog:
 1.1.4 - Added Seed to Computron voice file to prevent repeating self on multiple overlapping requests
 1.1.4 - ToDo - Create Stats script to keep track of current totals, runtime, last start
 1.1.5 - Added Pause support to fullscreenyoutube.exe, Added soft stop (pause/play on new call) vs hard stop (stopallsounds)
+1.1.6 - Added support for non embedded fullscreen youtube
+1.1.7 - Adding Custom Script Support
 #>
