@@ -1,6 +1,6 @@
 # OnAir Mega Script - Combines all tools into One
 # Ron Egli - Github.com/SmugZombie
-# Version 1.1.7
+# Version 1.1.8
 # Made for use with alreadydev.com
 
 # Load INI Items
@@ -27,6 +27,7 @@ $MediaDir =                     Get-Content -Path $INI | Where-Object { $_ -matc
 $GifsDir =                      Get-Content -Path $INI | Where-Object { $_ -match 'GifsDir=' }; $GifsDir = $GifsDir.Split('=')[1]
 $OnlineCheckUrl =               Get-Content -Path $INI | Where-Object { $_ -match 'OnlineCheckUrl=' }; $OnlineCheckUrl = $OnlineCheckUrl.Split('=')[1]
 $CustomScriptUrl =              Get-Content -Path $INI | Where-Object { $_ -match 'CustomScriptUrl=' }; $CustomScriptUrl = $CustomScriptUrl.Split('=')[1]
+$INISFWMode =                   Get-Content -Path $INI | Where-Object { $_ -match 'SFWMode=' }; $INISFWMode = $INISFWMode.Split('=')[1]
 # Change Window Title
 $host.ui.RawUI.WindowTitle = "$ScriptName $ScriptVersion - [AlreadyDev]"
 # Track Reloads
@@ -297,7 +298,7 @@ function Load-Gifs {
     param([string]$directory)
     if($global:sfw_mode -eq 1){
         # Exclude NSFW
-        $gifs_list = Get-ChildItem -Path $directory"/*" -Include *.gif -Exclude *_NSFW* | ForEach-Object {$_.name} | Sort-Object {Get-Random}
+        $gifs_list = Get-ChildItem -Path $directory"/*" -Include *.gif -Exclude *_NSF* | ForEach-Object {$_.name} | Sort-Object {Get-Random}
     }else{
         # Include All
         $gifs_list = Get-ChildItem $directory -Filter "*.gif"  | ForEach-Object {$_.name} | Sort-Object {Get-Random}
@@ -363,7 +364,7 @@ debug("Debug Mode Enabled")
 debug($ScriptVersion)
 $global:current_total = 0
 $global:safe_mode = 0
-$global:sfw_mode = 1
+$global:sfw_mode = $INISFWMode
 $sounds = Load-Sounds $MediaDir
 #Write-Host $sounds
 $global:sounds_ind = 0
@@ -405,4 +406,5 @@ Changelog:
 1.1.5 - Added Pause support to fullscreenyoutube.exe, Added soft stop (pause/play on new call) vs hard stop (stopallsounds)
 1.1.6 - Added support for non embedded fullscreen youtube
 1.1.7 - Adding Custom Script Support
+1.1.8 - Updated NSFW to NSF* to include NSFM and NSFW tags when excluding GIFs in safemode, Moved SFTMode to ini
 #>
